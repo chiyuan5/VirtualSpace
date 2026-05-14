@@ -5,7 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.virtual.core.VirtualCore;
-import com.virtual.util.Log;
+import com.virtual.util.VirtualLog;
 
 public class BootReceiver extends BroadcastReceiver {
 
@@ -14,13 +14,13 @@ public class BootReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         if (Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction())) {
-            Log.i(TAG, "Boot completed, starting VirtualService");
+            VirtualLog.i(TAG, "Boot completed, starting VirtualService");
 
             try {
                 Intent serviceIntent = new Intent(context, com.virtual.app.service.VirtualService.class);
                 context.startService(serviceIntent);
             } catch (Exception e) {
-                Log.e(TAG, "Failed to start VirtualService", e);
+                VirtualLog.e(TAG, "Failed to start VirtualService", e);
             }
         }
     }

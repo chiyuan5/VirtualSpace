@@ -23,7 +23,7 @@ import com.virtual.app.R;
 import com.virtual.app.adapter.ClonedAppAdapter;
 import com.virtual.core.VirtualCore;
 import com.virtual.core.entity.VirtualApp;
-import com.virtual.util.Log;
+import com.virtual.util.VirtualLog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -127,10 +127,10 @@ public class ClonedAppsFragment extends Fragment {
                 launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 requireContext().startActivity(launchIntent);
             } else {
-                Log.w(TAG, "No launch intent for: " + app.fakePackageName);
+                VirtualLog.w(TAG, "No launch intent for: " + app.fakePackageName);
             }
         } catch (Exception e) {
-            Log.e(TAG, "Failed to open clone", e);
+            VirtualLog.e(TAG, "Failed to open clone", e);
         }
     }
 
@@ -168,7 +168,7 @@ public class ClonedAppsFragment extends Fragment {
             try {
                 return VirtualCore.get().getAllVirtualApps();
             } catch (Exception e) {
-                Log.e(TAG, "Error loading cloned apps", e);
+                VirtualLog.e(TAG, "Error loading cloned apps", e);
                 return new ArrayList<>();
             }
         }

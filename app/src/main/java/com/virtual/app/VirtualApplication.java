@@ -8,7 +8,7 @@ import com.virtual.core.VirtualCore;
 import com.virtual.core.dispatch.VirtualDispatch;
 import com.virtual.core.service.ServiceBroker;
 import com.virtual.hook.HookManager;
-import com.virtual.util.Log;
+import com.virtual.util.VirtualLog;
 
 public class VirtualApplication extends Application {
 
@@ -23,8 +23,8 @@ public class VirtualApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
-        Log.i(TAG, "VirtualSpace starting...");
-        Log.i(TAG, "Android Version: " + Build.VERSION.RELEASE + " (SDK " + Build.VERSION.SDK_INT + ")");
+        VirtualLog.i(TAG, "VirtualSpace starting...");
+        VirtualLog.i(TAG, "Android Version: " + Build.VERSION.RELEASE + " (SDK " + Build.VERSION.SDK_INT + ")");
 
         try {
             VirtualCore.get().init(this);
@@ -33,14 +33,14 @@ public class VirtualApplication extends Application {
                 HookManager.get().init();
                 VirtualDispatch.getInstance(VirtualCore.get()).init();
                 ServiceBroker.getInstance(this).init();
-                Log.i(TAG, "Virtualization engine initialized");
+                VirtualLog.i(TAG, "Virtualization engine initialized");
             } else {
-                Log.w(TAG, "Android version not supported, limited functionality");
+                VirtualLog.w(TAG, "Android version not supported, limited functionality");
             }
 
-            Log.i(TAG, "VirtualSpace ready");
+            VirtualLog.i(TAG, "VirtualSpace ready");
         } catch (Exception e) {
-            Log.e(TAG, "Failed to initialize VirtualSpace", e);
+            VirtualLog.e(TAG, "Failed to initialize VirtualSpace", e);
         }
     }
 

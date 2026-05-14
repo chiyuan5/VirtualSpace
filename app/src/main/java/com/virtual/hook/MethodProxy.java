@@ -1,114 +1,48 @@
 package com.virtual.hook;
 
-import android.app.ActivityThread;
 import android.content.Context;
-import android.content.pm.PackageManager;
-import android.os.Build;
-import android.os.IBinder;
 
 import com.virtual.core.VirtualCore;
-import com.virtual.util.Log;
-
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
+import com.virtual.util.VirtualLog;
 
 public class MethodProxy {
 
     private static final String TAG = "MethodProxy";
 
-    public static IBinder queryLocalInterface(Object obj, String descriptor) {
-        if (obj == null) {
+    public static Context getSystemContext() {
+        try {
+            VirtualLog.i(TAG, "Getting system context");
+            return null;
+        } catch (Exception e) {
+            VirtualLog.e(TAG, "Failed to get system context", e);
             return null;
         }
-
-        try {
-            Field field = obj.getClass().getDeclaredField("mDescriptor");
-            field.setAccessible(true);
-            String mDescriptor = (String) field.get(obj);
-
-            if (mDescriptor != null && mDescriptor.equals(descriptor)) {
-                Log.d(TAG, "Intercepted queryLocalInterface for: " + descriptor);
-            }
-        } catch (Exception e) {
-        }
-
-        return null;
     }
 
-    public static PackageManager getPackageManager(Object obj) {
-        try {
-            Field field = ActivityThread.class.getDeclaredField("mSystemContext");
-            field.setAccessible(true);
-            Context context = (Context) field.get(null);
-
-            if (context != null) {
-                return context.getPackageManager();
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "Failed to get PackageManager", e);
-        }
-
-        return null;
-    }
-
-    public static int getCallingUid(Object obj, Object[] args) {
-        try {
-            if (args != null && args.length > 0) {
-                Object BinderObj = args[0];
-                Class<?> BinderClass = Class.forName("android.os.Binder");
-                Method getCallingUidMethod = BinderClass.getDeclaredMethod("getCallingUid");
-                return (int) getCallingUidMethod.invoke(null);
-            }
-        } catch (Exception e) {
-        }
+    public static int getUserId() {
         return 0;
     }
 
-    public static String getPackageName(Object obj, Object[] args) {
-        try {
-            if (args != null && args.length > 0 && args[0] != null) {
-                if (args[0] instanceof String) {
-                    return (String) args[0];
-                }
-            }
-        } catch (Exception e) {
-        }
-        return null;
+    public static boolean isVirtualApp(String packageName) {
+        if (packageName == null) return false;
+        
+        VirtualCore core = VirtualCore.get();
+        return core != null && core.isVirtualPackage(packageName);
     }
 
-    public static int getUserId(Object obj, Object[] args) {
-        try {
-            if (args != null && args.length > 0) {
-                if (args[0] instanceof Integer) {
-                    return (int) args[0];
-                }
-            }
-        } catch (Exception e) {
-        }
-        return 0;
+    public static void onActivityCreated(String packageName) {
+        VirtualLog.i(TAG, "Activity created: " + packageName);
     }
 
-    public static Object onTransact(Object obj, int code, Object data, Object reply, int flags) {
-        try {
-            Log.d(TAG, "onTransact called with code: " + code);
-        } catch (Exception e) {
-        }
-        return null;
+    public static void onActivityDestroyed(String packageName) {
+        VirtualLog.i(TAG, "Activity destroyed: " + packageName);
     }
 
-    public static String getDeviceId(int userId) {
-        VirtualApp app = VirtualCore.get().getVirtualAppByUserId(userId);
-        if (app != null && app.fakeDeviceId != null) {
-            return app.fakeDeviceId;
-        }
-        return null;
+    public static void onServiceCreated(String packageName) {
+        VirtualLog.i(TAG, "Service created: " + packageName);
     }
 
-    public static String getAndroidId(int userId) {
-        VirtualApp app = VirtualCore.get().getVirtualAppByUserId(userId);
-        if (app != null && app.fakeAndroidId != null) {
-            return app.fakeAndroidId;
-        }
-        return null;
+    public static void onProviderCreated(String packageName) {
+        VirtualLog.i(TAG, "Provider created: " + packageName);
     }
 }

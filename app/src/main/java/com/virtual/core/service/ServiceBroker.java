@@ -11,7 +11,7 @@ import android.os.RemoteException;
 import com.virtual.core.VirtualCore;
 import com.virtual.core.entity.VirtualApp;
 import com.virtual.core.entity.VirtualPackage;
-import com.virtual.util.Log;
+import com.virtual.util.VirtualLog;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -52,7 +52,7 @@ public class ServiceBroker {
     public void init() {
         hookSystemServices();
         replaceServiceManager();
-        Log.i(TAG, "ServiceBroker initialized");
+        VirtualLog.i(TAG, "ServiceBroker initialized");
     }
 
     private void hookSystemServices() {
@@ -65,7 +65,7 @@ public class ServiceBroker {
             hookNotificationManagerService();
             hookTelephonyService();
         } catch (Exception e) {
-            Log.e(TAG, "Failed to hook system services", e);
+            VirtualLog.e(TAG, "Failed to hook system services", e);
         }
     }
 
@@ -83,10 +83,10 @@ public class ServiceBroker {
                 proxyServices.put("activity", proxyAMS);
 
                 replaceServiceInCache("activity", proxyAMS);
-                Log.i(TAG, "ActivityManagerService hooked");
+                VirtualLog.i(TAG, "ActivityManagerService hooked");
             }
         } catch (Exception e) {
-            Log.e(TAG, "Failed to hook AMS", e);
+            VirtualLog.e(TAG, "Failed to hook AMS", e);
         }
     }
 
@@ -104,10 +104,10 @@ public class ServiceBroker {
                 proxyServices.put("package", proxyPMS);
 
                 replaceServiceInCache("package", proxyPMS);
-                Log.i(TAG, "PackageManagerService hooked");
+                VirtualLog.i(TAG, "PackageManagerService hooked");
             }
         } catch (Exception e) {
-            Log.e(TAG, "Failed to hook PMS", e);
+            VirtualLog.e(TAG, "Failed to hook PMS", e);
         }
     }
 
@@ -120,10 +120,10 @@ public class ServiceBroker {
             IBinder originalUMS = (IBinder) getServiceMethod.invoke(null, "user");
             if (originalUMS != null) {
                 originalServices.put("user", originalUMS);
-                Log.i(TAG, "UserManagerService available");
+                VirtualLog.i(TAG, "UserManagerService available");
             }
         } catch (Exception e) {
-            Log.e(TAG, "Failed to hook UMS", e);
+            VirtualLog.e(TAG, "Failed to hook UMS", e);
         }
     }
 
@@ -136,10 +136,10 @@ public class ServiceBroker {
             IBinder original = (IBinder) getServiceMethod.invoke(null, "account");
             if (original != null) {
                 originalServices.put("account", original);
-                Log.i(TAG, "AccountManagerService available");
+                VirtualLog.i(TAG, "AccountManagerService available");
             }
         } catch (Exception e) {
-            Log.e(TAG, "Failed to hook AccountManager", e);
+            VirtualLog.e(TAG, "Failed to hook AccountManager", e);
         }
     }
 
@@ -152,10 +152,10 @@ public class ServiceBroker {
             IBinder original = (IBinder) getServiceMethod.invoke(null, "device_policy");
             if (original != null) {
                 originalServices.put("device_policy", original);
-                Log.i(TAG, "DevicePolicyService available");
+                VirtualLog.i(TAG, "DevicePolicyService available");
             }
         } catch (Exception e) {
-            Log.e(TAG, "Failed to hook DevicePolicy", e);
+            VirtualLog.e(TAG, "Failed to hook DevicePolicy", e);
         }
     }
 
@@ -168,10 +168,10 @@ public class ServiceBroker {
             IBinder original = (IBinder) getServiceMethod.invoke(null, "notification");
             if (original != null) {
                 originalServices.put("notification", original);
-                Log.i(TAG, "NotificationManagerService available");
+                VirtualLog.i(TAG, "NotificationManagerService available");
             }
         } catch (Exception e) {
-            Log.e(TAG, "Failed to hook NotificationManager", e);
+            VirtualLog.e(TAG, "Failed to hook NotificationManager", e);
         }
     }
 
@@ -184,10 +184,10 @@ public class ServiceBroker {
             IBinder original = (IBinder) getServiceMethod.invoke(null, "phone");
             if (original != null) {
                 originalServices.put("phone", original);
-                Log.i(TAG, "TelephonyService available");
+                VirtualLog.i(TAG, "TelephonyService available");
             }
         } catch (Exception e) {
-            Log.e(TAG, "Failed to hook Telephony", e);
+            VirtualLog.e(TAG, "Failed to hook Telephony", e);
         }
     }
 
@@ -205,10 +205,10 @@ public class ServiceBroker {
             if (currentAMS != null) {
                 IBinder proxyAMS = createAMSProxy(currentAMS);
                 iActivityManagerField.set(activityThread, proxyAMS);
-                Log.i(TAG, "ActivityThread IActivityManager replaced");
+                VirtualLog.i(TAG, "ActivityThread IActivityManager replaced");
             }
         } catch (Exception e) {
-            Log.e(TAG, "Failed to replace ServiceManager", e);
+            VirtualLog.e(TAG, "Failed to replace ServiceManager", e);
         }
     }
 
@@ -220,7 +220,7 @@ public class ServiceBroker {
             Map<String, IBinder> cache = (Map<String, IBinder>) cacheField.get(null);
             cache.put(name, binder);
         } catch (Exception e) {
-            Log.e(TAG, "Failed to replace service in cache: " + name, e);
+            VirtualLog.e(TAG, "Failed to replace service in cache: " + name, e);
         }
     }
 
@@ -334,7 +334,7 @@ public class ServiceBroker {
 
             return false;
         } catch (Exception e) {
-            Log.e(TAG, "AMS intercept error", e);
+            VirtualLog.e(TAG, "AMS intercept error", e);
             return false;
         }
     }
@@ -343,7 +343,7 @@ public class ServiceBroker {
         try {
             return false;
         } catch (Exception e) {
-            Log.e(TAG, "PMS intercept error", e);
+            VirtualLog.e(TAG, "PMS intercept error", e);
             return false;
         }
     }
@@ -352,7 +352,7 @@ public class ServiceBroker {
         try {
             data.setDataPosition(0);
         } catch (Exception e) {
-            Log.e(TAG, "handleStartActivity error", e);
+            VirtualLog.e(TAG, "handleStartActivity error", e);
         }
     }
 
@@ -360,7 +360,7 @@ public class ServiceBroker {
         try {
             data.setDataPosition(0);
         } catch (Exception e) {
-            Log.e(TAG, "handleStopActivity error", e);
+            VirtualLog.e(TAG, "handleStopActivity error", e);
         }
     }
 
@@ -368,7 +368,7 @@ public class ServiceBroker {
         try {
             data.setDataPosition(0);
         } catch (Exception e) {
-            Log.e(TAG, "handleResumeActivity error", e);
+            VirtualLog.e(TAG, "handleResumeActivity error", e);
         }
     }
 
@@ -376,7 +376,7 @@ public class ServiceBroker {
         try {
             data.setDataPosition(0);
         } catch (Exception e) {
-            Log.e(TAG, "handlePauseActivity error", e);
+            VirtualLog.e(TAG, "handlePauseActivity error", e);
         }
     }
 

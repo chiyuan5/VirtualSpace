@@ -25,7 +25,7 @@ import com.virtual.app.R;
 import com.virtual.app.adapter.AppAdapter;
 import com.virtual.core.VirtualCore;
 import com.virtual.core.entity.VirtualPackage;
-import com.virtual.util.Log;
+import com.virtual.util.VirtualLog;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -133,7 +133,7 @@ public class InstalledAppsFragment extends Fragment {
                 });
 
             } catch (Exception e) {
-                Log.e(TAG, "Error loading apps", e);
+                VirtualLog.e(TAG, "Error loading apps", e);
             }
 
             return apps;

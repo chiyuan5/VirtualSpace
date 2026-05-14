@@ -17,7 +17,7 @@ import com.google.android.material.tabs.TabLayoutMediator;
 import com.virtual.app.R;
 import com.virtual.app.VirtualApplication;
 import com.virtual.core.VirtualCore;
-import com.virtual.util.Log;
+import com.virtual.util.VirtualLog;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         if (!VirtualCore.get().isSupportVersion()) {
-            Log.w(TAG, "Unsupported Android version: " + android.os.Build.VERSION.SDK_INT);
+            VirtualLog.w(TAG, "Unsupported Android version: " + android.os.Build.VERSION.SDK_INT);
         }
 
         initViews();

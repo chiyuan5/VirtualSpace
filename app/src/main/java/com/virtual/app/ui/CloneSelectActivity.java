@@ -17,7 +17,7 @@ import com.virtual.app.adapter.AppAdapter;
 import com.virtual.core.VirtualCore;
 import com.virtual.core.entity.VirtualApp;
 import com.virtual.core.entity.VirtualPackage;
-import com.virtual.util.Log;
+import com.virtual.util.VirtualLog;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -118,7 +118,7 @@ public class CloneSelectActivity extends AppCompatActivity {
                 });
 
             } catch (Exception e) {
-                Log.e(TAG, "Failed to clone package", e);
+                VirtualLog.e(TAG, "Failed to clone package", e);
                 runOnUiThread(() -> {
                     progressBar.setVisibility(View.GONE);
                     Toast.makeText(this, R.string.toast_clone_failed, Toast.LENGTH_SHORT).show();

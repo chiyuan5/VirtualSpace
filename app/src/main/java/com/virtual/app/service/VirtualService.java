@@ -7,7 +7,7 @@ import android.os.IBinder;
 import com.virtual.core.VirtualCore;
 import com.virtual.core.dispatch.VirtualDispatch;
 import com.virtual.core.service.ServiceBroker;
-import com.virtual.util.Log;
+import com.virtual.util.VirtualLog;
 
 public class VirtualService extends Service {
 
@@ -16,12 +16,12 @@ public class VirtualService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.i(TAG, "VirtualService created");
+        VirtualLog.i(TAG, "VirtualService created");
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.i(TAG, "VirtualService started");
+        VirtualLog.i(TAG, "VirtualService started");
 
         try {
             if (!VirtualCore.get().isInitialized()) {
@@ -33,7 +33,7 @@ public class VirtualService extends Service {
                 ServiceBroker.getInstance(this).init();
             }
         } catch (Exception e) {
-            Log.e(TAG, "Failed to initialize virtual service", e);
+            VirtualLog.e(TAG, "Failed to initialize virtual service", e);
         }
 
         return START_STICKY;
@@ -47,6 +47,6 @@ public class VirtualService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.i(TAG, "VirtualService destroyed");
+        VirtualLog.i(TAG, "VirtualService destroyed");
     }
 }

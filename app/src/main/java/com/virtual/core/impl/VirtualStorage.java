@@ -7,7 +7,7 @@ import android.content.pm.PackageManager;
 import com.virtual.core.VirtualCore;
 import com.virtual.core.entity.VirtualApp;
 import com.virtual.core.entity.VirtualPackage;
-import com.virtual.util.Log;
+import com.virtual.util.VirtualLog;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -45,7 +45,7 @@ public class VirtualStorage {
             storageDir.mkdirs();
         }
         loadAll();
-        Log.d(TAG, "VirtualStorage initialized");
+        VirtualLog.d(TAG, "VirtualStorage initialized");
     }
 
     public void saveAll() {
@@ -73,18 +73,18 @@ public class VirtualStorage {
                     VirtualCore.get().getAllVirtualApps().add(app);
                 }
             }
-            Log.d(TAG, "Loaded " + appsCache.size() + " virtual apps");
+            VirtualLog.d(TAG, "Loaded " + appsCache.size() + " virtual apps");
         } catch (Exception e) {
-            Log.e(TAG, "Failed to load apps", e);
+            VirtualLog.e(TAG, "Failed to load apps", e);
         }
     }
 
     private void saveApps() {
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(appsFile))) {
             oos.writeObject(new HashMap<>(appsCache));
-            Log.d(TAG, "Saved " + appsCache.size() + " virtual apps");
+            VirtualLog.d(TAG, "Saved " + appsCache.size() + " virtual apps");
         } catch (IOException e) {
-            Log.e(TAG, "Failed to save apps", e);
+            VirtualLog.e(TAG, "Failed to save apps", e);
         }
     }
 
@@ -99,18 +99,18 @@ public class VirtualStorage {
             if (loaded != null) {
                 packagesCache.putAll(loaded);
             }
-            Log.d(TAG, "Loaded " + packagesCache.size() + " virtual packages");
+            VirtualLog.d(TAG, "Loaded " + packagesCache.size() + " virtual packages");
         } catch (Exception e) {
-            Log.e(TAG, "Failed to load packages", e);
+            VirtualLog.e(TAG, "Failed to load packages", e);
         }
     }
 
     private void savePackages() {
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(packagesFile))) {
             oos.writeObject(new HashMap<>(packagesCache));
-            Log.d(TAG, "Saved " + packagesCache.size() + " virtual packages");
+            VirtualLog.d(TAG, "Saved " + packagesCache.size() + " virtual packages");
         } catch (IOException e) {
-            Log.e(TAG, "Failed to save packages", e);
+            VirtualLog.e(TAG, "Failed to save packages", e);
         }
     }
 
