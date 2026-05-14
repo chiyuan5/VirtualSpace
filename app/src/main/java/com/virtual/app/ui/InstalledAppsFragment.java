@@ -4,15 +4,12 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -23,13 +20,10 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.virtual.app.R;
 import com.virtual.app.adapter.AppAdapter;
-import com.virtual.core.VirtualCore;
-import com.virtual.core.entity.VirtualPackage;
 import com.virtual.util.VirtualLog;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 public class InstalledAppsFragment extends Fragment {
@@ -78,17 +72,23 @@ public class InstalledAppsFragment extends Fragment {
     }
 
     private void setupSwipeRefresh() {
-        swipeRefresh.setOnRefreshListener(this::loadInstalledApps);
-        swipeRefresh.setColorSchemeResources(R.color.colorPrimary);
+        if (swipeRefresh != null) {
+            swipeRefresh.setOnRefreshListener(this::loadInstalledApps);
+            swipeRefresh.setColorSchemeResources(R.color.colorPrimary);
+        }
     }
 
     private void loadInstalledApps() {
         if (getContext() == null) return;
 
-        if (installedApps.isEmpty()) {
-            progressBar.setVisibility(View.VISIBLE);
+        if (progressBar != null) {
+            if (installedApps.isEmpty()) {
+                progressBar.setVisibility(View.VISIBLE);
+            }
         }
-        emptyView.setVisibility(View.GONE);
+        if (emptyView != null) {
+            emptyView.setVisibility(View.GONE);
+        }
 
         new LoadAppsTask(requireContext()).execute();
     }
@@ -146,15 +146,23 @@ public class InstalledAppsFragment extends Fragment {
             installedApps.clear();
             installedApps.addAll(result);
 
-            adapter.notifyDataSetChanged();
+            if (adapter != null) {
+                adapter.notifyDataSetChanged();
+            }
 
-            progressBar.setVisibility(View.GONE);
-            swipeRefresh.setRefreshing(false);
+            if (progressBar != null) {
+                progressBar.setVisibility(View.GONE);
+            }
+            if (swipeRefresh != null) {
+                swipeRefresh.setRefreshing(false);
+            }
 
-            if (installedApps.isEmpty()) {
-                emptyView.setVisibility(View.VISIBLE);
-            } else {
-                emptyView.setVisibility(View.GONE);
+            if (emptyView != null) {
+                if (installedApps.isEmpty()) {
+                    emptyView.setVisibility(View.VISIBLE);
+                } else {
+                    emptyView.setVisibility(View.GONE);
+                }
             }
         }
     }

@@ -91,15 +91,21 @@ public class ClonedAppsFragment extends Fragment {
     }
 
     private void setupSwipeRefresh() {
-        swipeRefresh.setOnRefreshListener(this::loadClonedApps);
-        swipeRefresh.setColorSchemeResources(R.color.colorPrimary);
+        if (swipeRefresh != null) {
+            swipeRefresh.setOnRefreshListener(this::loadClonedApps);
+            swipeRefresh.setColorSchemeResources(R.color.colorPrimary);
+        }
     }
 
     private void loadClonedApps() {
-        if (clonedApps.isEmpty()) {
-            progressBar.setVisibility(View.VISIBLE);
+        if (progressBar != null) {
+            if (clonedApps.isEmpty()) {
+                progressBar.setVisibility(View.VISIBLE);
+            }
         }
-        emptyView.setVisibility(View.GONE);
+        if (emptyView != null) {
+            emptyView.setVisibility(View.GONE);
+        }
 
         new LoadClonedAppsTask().execute();
     }
@@ -169,13 +175,19 @@ public class ClonedAppsFragment extends Fragment {
 
             adapter.notifyDataSetChanged();
 
-            progressBar.setVisibility(View.GONE);
-            swipeRefresh.setRefreshing(false);
+            if (progressBar != null) {
+                progressBar.setVisibility(View.GONE);
+            }
+            if (swipeRefresh != null) {
+                swipeRefresh.setRefreshing(false);
+            }
 
-            if (clonedApps.isEmpty()) {
-                emptyView.setVisibility(View.VISIBLE);
-            } else {
-                emptyView.setVisibility(View.GONE);
+            if (emptyView != null) {
+                if (clonedApps.isEmpty()) {
+                    emptyView.setVisibility(View.VISIBLE);
+                } else {
+                    emptyView.setVisibility(View.GONE);
+                }
             }
         }
     }
