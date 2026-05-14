@@ -15,7 +15,7 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void* reserved) {
     return JNI_VERSION_1_6;
 }
 
-JNIEXPORT void JNICALL Java_com_virtual_hook_native_NativeHook_init(JNIEnv* env, jobject thiz) {
+JNIEXPORT void JNICALL Java_com_virtual_hook_native_NativeHook_initNative(JNIEnv* env, jobject thiz) {
     if (g_hook_initialized) return;
     
     g_hook_callback = env->NewGlobalRef(thiz);
