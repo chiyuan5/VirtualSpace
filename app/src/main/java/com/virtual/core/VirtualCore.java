@@ -5,6 +5,8 @@ import android.content.Context;
 import com.virtual.core.entity.VirtualApp;
 import com.virtual.core.entity.VirtualPackage;
 import com.virtual.core.impl.VirtualStorage;
+import com.virtual.hook.WebViewFixer;
+import com.virtual.hook.NetworkFixer;
 import com.virtual.util.VirtualLog;
 
 import java.util.ArrayList;
@@ -49,8 +51,11 @@ public class VirtualCore {
         this.storage.init();
         loadVirtualApps();
         
+        WebViewFixer.init(this.context);
+        NetworkFixer.init(this.context);
+        
         isInitialized = true;
-        VirtualLog.i(TAG, "VirtualCore initialized");
+        VirtualLog.i(TAG, "VirtualCore initialized with Android 13+ fixes");
     }
 
     public Context getContext() {
