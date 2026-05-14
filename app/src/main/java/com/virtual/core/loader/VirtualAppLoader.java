@@ -20,8 +20,7 @@ public class VirtualAppLoader {
         try {
             VirtualLog.i(TAG, "Creating virtual context for: " + packageName);
             
-            Context virtualContext = hostContext.createPackageContext(packageName, 
-                Context.CONTEXT_IGNORE_SECURITY_FLAGS);
+            Context virtualContext = hostContext.createPackageContext(packageName, 0);
             return virtualContext;
         } catch (Exception e) {
             VirtualLog.e(TAG, "Failed to create virtual context", e);
