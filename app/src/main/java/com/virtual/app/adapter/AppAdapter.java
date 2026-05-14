@@ -33,12 +33,18 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> i
 
     public AppAdapter(List<PackageInfo> apps, boolean selectionMode) {
         this.apps = apps;
-        this.appsFiltered = new ArrayList<>(apps);
+        this.appsFiltered = apps;
         this.selectionMode = selectionMode;
     }
 
     public void setOnItemClickListener(OnItemClickListener listener) {
         this.listener = listener;
+    }
+
+    public void updateData(List<PackageInfo> newApps) {
+        this.apps = newApps;
+        this.appsFiltered = newApps;
+        notifyDataSetChanged();
     }
 
     @NonNull
@@ -51,13 +57,14 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> i
 
     @Override
     public void onBindViewHolder(@NonNull AppViewHolder holder, int position) {
+        if (position >= appsFiltered.size()) return;
         PackageInfo pkg = appsFiltered.get(position);
         holder.bind(pkg);
     }
 
     @Override
     public int getItemCount() {
-        return appsFiltered.size();
+        return appsFiltered != null ? appsFiltered.size() : 0;
     }
 
     @Override
@@ -66,6 +73,8 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> i
             @Override
             protected FilterResults performFiltering(CharSequence constraint) {
                 List<PackageInfo> filtered = new ArrayList<>();
+                if (apps == null) return new FilterResults();
+
                 String filterPattern = constraint.toString().toLowerCase().trim();
 
                 for (PackageInfo pkgInfo : apps) {
