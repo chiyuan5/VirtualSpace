@@ -6,6 +6,7 @@ import android.content.pm.ApplicationInfo;
 import com.virtual.util.VirtualLog;
 
 import java.io.File;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
 public class VirtualAppLoader {
@@ -38,11 +39,12 @@ public class VirtualAppLoader {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public ClassLoader createClassLoader(File apkFile, File dexDir, ClassLoader parent) {
         try {
             Class<?> clazz = Class.forName("dalvik.system.DexClassLoader");
-            Method method = clazz.getMethod("DexClassLoader", String.class, String.class, String.class, ClassLoader.class);
-            return (ClassLoader) method.invoke(null, apkFile.getAbsolutePath(), dexDir.getAbsolutePath(), null, parent);
+            Constructor<?> constructor = clazz.getConstructor(String.class, String.class, String.class, ClassLoader.class);
+            return (ClassLoader) constructor.newInstance(apkFile.getAbsolutePath(), dexDir.getAbsolutePath(), null, parent);
         } catch (Exception e) {
             VirtualLog.e(TAG, "Failed to create class loader", e);
             return parent;
