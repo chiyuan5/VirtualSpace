@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">VirtualSpace</string>
+    <string name="action_settings">Settings</string>
+    <string name="action_clone">Clone App</string>
+    <string name="action_refresh">Refresh</string>
+    <string name="action_about">About</string>
+
+    <string name="title_installed_apps">Installed Apps</string>
+    <string name="title_cloned_apps">Cloned Apps</string>
+
+    <string name="empty_cloned_apps">No cloned apps yet.\nTap the button below to start cloning.</string>
+    <string name="empty_installed_apps">No apps found.</string>
+
+    <string name="btn_clone_app">Clone Selected</string>
+    <string name="btn_create_clone">Create New Clone</string>
+    <string name="btn_delete_clone">Delete</string>
+    <string name="btn_open_clone">Open</string>
+
+    <string name="dialog_delete_title">Delete Clone</string>
+    <string name="dialog_delete_message">Are you sure you want to delete this clone? This action cannot be undone.</string>
+    <string name="dialog_cancel">Cancel</string>
+    <string name="dialog_confirm">Confirm</string>
+
+    <string name="toast_clone_success">Clone created successfully</string>
+    <string name="toast_clone_failed">Failed to create clone</string>
+    <string name="toast_delete_success">Clone deleted successfully</string>
+    <string name="toast_delete_failed">Failed to delete clone</string>
+    <string name="toast_already_cloned">This app is already cloned</string>
+    <string name="toast_no_app_selected">Please select an app to clone</string>
+
+    <string name="label_version">Version</string>
+    <string name="label_package">Package</string>
+    <string name="label_clone_count">Clone Count</string>
+    <string name="label_user_id">User ID</string>
+
+    <string name="settings_spoof_device">Spoof Device Info</string>
+    <string name="settings_spoof_device_summary">Hide your real device information from cloned apps</string>
+    <string name="settings_spoof_location">Spoof Location</string>
+    <string name="settings_spoof_location_summary">Fake GPS location for cloned apps</string>
+    <string name="settings_auto_start">Auto Start</string>
+    <string name="settings_auto_start_summary">Launch cloned apps when device boots</string>
+    <string name="settings_notifications">Notifications</string>
+    <string name="settings_notifications_summary">Enable notifications for cloned apps</string>
+
+    <string name="about_version">Version %s</string>
+    <string name="about_description">A powerful app cloning solution for Android with advanced virtualization technology.</string>
+    <string name="about_supported_versions">Supported: Android 9 - Android 15</string>
+
+    <string name="search_hint">Search apps...</string>
+    <string name="sort_by_name">Sort by Name</string>
+    <string name="sort_by_date">Sort by Date</string>
+    <string name="sort_by_size">Sort by Size</string>
+
+    <string name="clone_info_title">Clone Info</string>
+    <string name="clone_app_name">App Name</string>
+    <string name="clone_package_name">Package Name</string>
+    <string name="clone_user_id">User ID</string>
+    <string name="clone_install_time">Install Time</string>
+
+    <string name="permission_denied">Permission denied</string>
+    <string name="permission_required">This feature requires additional permissions</string>
+
+    <string name="loading">Loading...</string>
+    <string name="error_generic">An error occurred</string>
+</resources>
