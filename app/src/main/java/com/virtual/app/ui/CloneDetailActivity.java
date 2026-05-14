@@ -2,14 +2,12 @@ package com.virtual.app.ui;
 
 import android.os.Bundle;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.virtual.app.R;
 import com.virtual.core.VirtualCore;
 import com.virtual.core.entity.VirtualApp;
@@ -35,7 +33,12 @@ public class CloneDetailActivity extends AppCompatActivity {
 
         String packageName = getIntent().getStringExtra(EXTRA_PACKAGE_NAME);
         if (packageName != null) {
-            currentApp = core.getVirtualApp(packageName);
+            for (VirtualApp app : core.getAllVirtualApps()) {
+                if (app.packageName.equals(packageName)) {
+                    currentApp = app;
+                    break;
+                }
+            }
         }
 
         initViews();
@@ -44,18 +47,8 @@ public class CloneDetailActivity extends AppCompatActivity {
     }
 
     private void initViews() {
-        SwitchMaterial switchSpoofDevice = findViewById(R.id.switchSpoofDevice);
-        SwitchMaterial switchSpoofLocation = findViewById(R.id.switchSpoofLocation);
-        SwitchMaterial switchAutoStart = findViewById(R.id.switchAutoStart);
-
-        if (switchSpoofDevice != null) {
-            switchSpoofDevice.setChecked(true);
-        }
-        if (switchSpoofLocation != null) {
-            switchSpoofLocation.setChecked(false);
-        }
-        if (switchAutoStart != null) {
-            switchAutoStart.setChecked(false);
+        if (currentApp == null) {
+            finish();
         }
     }
 
@@ -74,24 +67,24 @@ public class CloneDetailActivity extends AppCompatActivity {
         }
 
         ImageView appIcon = findViewById(R.id.appIcon);
-        TextView appName = findViewById(R.id.appName);
-        TextView packageName = findViewById(R.id.packageName);
-        TextView userId = findViewById(R.id.userId);
-        TextView installTime = findViewById(R.id.installTime);
-        TextView cloneCount = findViewById(R.id.cloneCount);
-        TextView fakeDeviceId = findViewById(R.id.fakeDeviceId);
-        TextView fakeAndroidId = findViewById(R.id.fakeAndroidId);
+        TextView appNameView = findViewById(R.id.appName);
+        TextView packageNameView = findViewById(R.id.packageName);
+        TextView userIdView = findViewById(R.id.userId);
+        TextView installTimeView = findViewById(R.id.installTime);
+        TextView cloneCountView = findViewById(R.id.cloneCount);
+        TextView fakeDeviceIdView = findViewById(R.id.fakeDeviceId);
+        TextView fakeAndroidIdView = findViewById(R.id.fakeAndroidId);
 
         try {
-            appName.setText(currentApp.appName);
-            packageName.setText(currentApp.packageName);
-            userId.setText(String.valueOf(currentApp.userId));
-            cloneCount.setText(String.valueOf(currentApp.clonedPackages.size()));
-            fakeDeviceId.setText(currentApp.fakeDeviceId);
-            fakeAndroidId.setText(currentApp.fakeAndroidId);
+            appNameView.setText(currentApp.appName);
+            packageNameView.setText(currentApp.packageName);
+            userIdView.setText(String.valueOf(currentApp.userId));
+            cloneCountView.setText(String.valueOf(currentApp.clonedPackages.size()));
+            fakeDeviceIdView.setText(currentApp.fakeDeviceId);
+            fakeAndroidIdView.setText(currentApp.fakeAndroidId);
 
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
-            installTime.setText(sdf.format(new Date(currentApp.createdTime)));
+            installTimeView.setText(sdf.format(new Date()));
 
             android.content.pm.ApplicationInfo appInfo = getPackageManager()
                 .getApplicationInfo(currentApp.packageName, 0);
@@ -99,7 +92,7 @@ public class CloneDetailActivity extends AppCompatActivity {
                 appIcon.setImageDrawable(appInfo.loadIcon(getPackageManager()));
             }
         } catch (Exception e) {
-            appName.setText(currentApp.packageName);
+            appNameView.setText(currentApp.packageName);
         }
     }
 

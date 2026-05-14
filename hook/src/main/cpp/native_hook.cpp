@@ -110,8 +110,8 @@ JNIEXPORT jboolean JNICALL Java_com_virtual_hook_nativehook_NativeHook_unhook(JN
     int result = unhook_plt_got(lib_name, sym_name, (void*)(uintptr_t)oldAddr);
     
     env->ReleaseStringUTFChars(library, lib_name);
-    env->ReleaseStringUTFChars(symbolName, sym_name);
-    
+    env->ReleaseStringUTFChars(symbol, sym_name);
+
     return result == HOOK_SUCCESS ? JNI_TRUE : JNI_FALSE;
 }
 

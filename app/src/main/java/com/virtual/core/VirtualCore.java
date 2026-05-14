@@ -45,7 +45,7 @@ public class VirtualCore {
         }
 
         this.context = ctx.getApplicationContext();
-        this.storage = new VirtualStorage(context);
+        this.storage = new VirtualStorage(this.context);
         this.storage.init();
         loadVirtualApps();
         

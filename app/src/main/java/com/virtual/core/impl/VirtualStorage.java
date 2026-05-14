@@ -1,162 +1,87 @@
 package com.virtual.core.impl;
 
 import android.content.Context;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
+import android.content.SharedPreferences;
 
-import com.virtual.core.VirtualCore;
 import com.virtual.core.entity.VirtualApp;
-import com.virtual.core.entity.VirtualPackage;
 import com.virtual.util.VirtualLog;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 public class VirtualStorage {
 
     private static final String TAG = "VirtualStorage";
-    private static final String STORAGE_DIR = "virtual_space";
-    private static final String APPS_FILE = "virtual_apps.dat";
-    private static final String PACKAGES_FILE = "virtual_packages.dat";
-
+    private static final String PREFS_NAME = "virtual_prefs";
+    private static final String VIRTUAL_APPS_FILE = "virtual_apps.dat";
+    
     private final Context context;
-    private final File storageDir;
-    private final File appsFile;
-    private final File packagesFile;
-
-    private final Map<String, VirtualApp> appsCache = new HashMap<>();
-    private final Map<String, VirtualPackage> packagesCache = new HashMap<>();
+    private final SharedPreferences prefs;
+    private final File dataDir;
 
     public VirtualStorage(Context context) {
         this.context = context;
-        this.storageDir = new File(context.getFilesDir(), STORAGE_DIR);
-        this.appsFile = new File(storageDir, APPS_FILE);
-        this.packagesFile = new File(storageDir, PACKAGES_FILE);
+        this.prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        this.dataDir = new File(context.getFilesDir(), "virtual");
+        if (!dataDir.exists()) {
+            dataDir.mkdirs();
+        }
     }
 
     public void init() {
-        if (!storageDir.exists()) {
-            storageDir.mkdirs();
-        }
-        loadAll();
-        VirtualLog.d(TAG, "VirtualStorage initialized");
+        VirtualLog.i(TAG, "VirtualStorage initialized");
     }
 
-    public void saveAll() {
-        saveApps();
-        savePackages();
-    }
-
-    @SuppressWarnings("unchecked")
-    private void loadAll() {
-        loadApps();
-        loadPackages();
-    }
-
-    @SuppressWarnings("unchecked")
-    private void loadApps() {
-        if (!appsFile.exists()) {
-            return;
-        }
-
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(appsFile))) {
-            Map<String, VirtualApp> loaded = (Map<String, VirtualApp>) ois.readObject();
-            if (loaded != null) {
-                appsCache.putAll(loaded);
-                for (VirtualApp app : loaded.values()) {
-                    VirtualCore.get().getAllVirtualApps().add(app);
-                }
+    public List<VirtualApp> loadVirtualApps() {
+        List<VirtualApp> apps = new ArrayList<>();
+        try {
+            File file = new File(dataDir, VIRTUAL_APPS_FILE);
+            if (file.exists()) {
+                FileInputStream fis = new FileInputStream(file);
+                ObjectInputStream ois = new ObjectInputStream(fis);
+                apps = (List<VirtualApp>) ois.readObject();
+                ois.close();
+                fis.close();
+                VirtualLog.i(TAG, "Loaded " + apps.size() + " virtual apps");
             }
-            VirtualLog.d(TAG, "Loaded " + appsCache.size() + " virtual apps");
         } catch (Exception e) {
-            VirtualLog.e(TAG, "Failed to load apps", e);
+            VirtualLog.e(TAG, "Failed to load virtual apps", e);
         }
+        return apps;
     }
 
-    private void saveApps() {
-        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(appsFile))) {
-            oos.writeObject(new HashMap<>(appsCache));
-            VirtualLog.d(TAG, "Saved " + appsCache.size() + " virtual apps");
-        } catch (IOException e) {
-            VirtualLog.e(TAG, "Failed to save apps", e);
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    private void loadPackages() {
-        if (!packagesFile.exists()) {
-            return;
-        }
-
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(packagesFile))) {
-            Map<String, VirtualPackage> loaded = (Map<String, VirtualPackage>) ois.readObject();
-            if (loaded != null) {
-                packagesCache.putAll(loaded);
-            }
-            VirtualLog.d(TAG, "Loaded " + packagesCache.size() + " virtual packages");
+    public void saveVirtualApps(List<VirtualApp> apps) {
+        try {
+            File file = new File(dataDir, VIRTUAL_APPS_FILE);
+            FileOutputStream fos = new FileOutputStream(file);
+            ObjectOutputStream oos = new ObjectOutputStream(fos);
+            oos.writeObject(apps);
+            oos.close();
+            fos.close();
+            VirtualLog.i(TAG, "Saved " + apps.size() + " virtual apps");
         } catch (Exception e) {
-            VirtualLog.e(TAG, "Failed to load packages", e);
+            VirtualLog.e(TAG, "Failed to save virtual apps", e);
         }
     }
 
-    private void savePackages() {
-        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(packagesFile))) {
-            oos.writeObject(new HashMap<>(packagesCache));
-            VirtualLog.d(TAG, "Saved " + packagesCache.size() + " virtual packages");
-        } catch (IOException e) {
-            VirtualLog.e(TAG, "Failed to save packages", e);
-        }
+    public void putString(String key, String value) {
+        prefs.edit().putString(key, value).apply();
     }
 
-    public void saveApp(VirtualApp app) {
-        if (app != null && app.packageName != null) {
-            appsCache.put(app.packageName, app);
-            saveApps();
-        }
+    public String getString(String key, String defaultValue) {
+        return prefs.getString(key, defaultValue);
     }
 
-    public void deleteApp(String packageName) {
-        appsCache.remove(packageName);
-        saveApps();
-        
-        // Remove associated packages
-        for (String key : packagesCache.keySet()) {
-            VirtualPackage pkg = packagesCache.get(key);
-            if (pkg != null && pkg.sourcePackage.equals(packageName)) {
-                packagesCache.remove(key);
-            }
-        }
-        savePackages();
+    public void putBoolean(String key, boolean value) {
+        prefs.edit().putBoolean(key, value).apply();
     }
 
-    public void savePackage(VirtualPackage pkg) {
-        if (pkg != null && pkg.packageName != null) {
-            String key = pkg.sourcePackage + "_" + pkg.userId;
-            packagesCache.put(key, pkg);
-            savePackages();
-        }
-    }
-
-    public VirtualApp getApp(String packageName) {
-        return appsCache.get(packageName);
-    }
-
-    public VirtualPackage getPackage(String sourcePackage, int userId) {
-        String key = sourcePackage + "_" + userId;
-        return packagesCache.get(key);
-    }
-
-    public Map<String, VirtualApp> getAllApps() {
-        return new HashMap<>(appsCache);
-    }
-
-    public Map<String, VirtualPackage> getAllPackages() {
-        return new HashMap<>(packagesCache);
+    public boolean getBoolean(String key, boolean defaultValue) {
+        return prefs.getBoolean(key, defaultValue);
     }
 }

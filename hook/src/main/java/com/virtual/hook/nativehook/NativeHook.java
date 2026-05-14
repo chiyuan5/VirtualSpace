@@ -1,6 +1,7 @@
 package com.virtual.hook.nativehook;
 
 import android.os.Build;
+import android.util.Log;
 
 public class NativeHook {
     
@@ -62,5 +63,10 @@ public class NativeHook {
     
     public static boolean isSupported() {
         return SUPPORTED && Build.VERSION.SDK_INT >= 28;
+    }
+
+    public long onNativeHook(String library, String symbol, long oldAddr, long newAddr) {
+        Log.i("NativeHook", "Hooked: " + symbol + " in " + library);
+        return oldAddr;
     }
 }

@@ -16,8 +16,9 @@ import com.virtual.app.R;
 import com.virtual.app.adapter.AppAdapter;
 import com.virtual.core.VirtualCore;
 import com.virtual.core.entity.VirtualApp;
-import com.virtual.core.entity.VirtualPackage;
 import com.virtual.util.VirtualLog;
+
+import android.content.pm.PackageManager;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -94,22 +95,17 @@ public class CloneSelectActivity extends AppCompatActivity {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(() -> {
             try {
-                VirtualApp existingApp = core.getVirtualApp(packageName);
-                if (existingApp == null) {
-                    core.createVirtualApp(packageName, "");
-                }
+                PackageManager pm = getPackageManager();
+                String appName = "";
+                try {
+                    appName = pm.getApplicationInfo(packageName, 0).loadLabel(pm).toString();
+                } catch (Exception ignored) {}
 
-                VirtualPackage vPkg = null;
-                for (VirtualApp app : core.getAllVirtualApps()) {
-                    if (app.packageName.equals(packageName)) {
-                        vPkg = core.clonePackage(packageName, app.userId);
-                        break;
-                    }
-                }
+                VirtualApp virtualApp = core.createVirtualApp(packageName, appName);
 
                 runOnUiThread(() -> {
                     progressBar.setVisibility(View.GONE);
-                    if (vPkg != null) {
+                    if (virtualApp != null) {
                         Toast.makeText(this, R.string.toast_clone_success, Toast.LENGTH_SHORT).show();
                         finish();
                     } else {

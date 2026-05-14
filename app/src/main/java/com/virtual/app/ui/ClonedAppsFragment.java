@@ -1,9 +1,6 @@
 package com.virtual.app.ui;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -23,7 +20,6 @@ import com.virtual.app.R;
 import com.virtual.app.adapter.ClonedAppAdapter;
 import com.virtual.core.VirtualCore;
 import com.virtual.core.entity.VirtualApp;
-import com.virtual.util.VirtualLog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +35,6 @@ public class ClonedAppsFragment extends Fragment {
 
     private ClonedAppAdapter adapter;
     private List<VirtualApp> clonedApps = new ArrayList<>();
-    private String currentFilter = "";
 
     @Nullable
     @Override
@@ -126,11 +121,8 @@ public class ClonedAppsFragment extends Fragment {
             if (launchIntent != null) {
                 launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 requireContext().startActivity(launchIntent);
-            } else {
-                VirtualLog.w(TAG, "No launch intent for: " + app.fakePackageName);
             }
         } catch (Exception e) {
-            VirtualLog.e(TAG, "Failed to open clone", e);
         }
     }
 
@@ -155,10 +147,6 @@ public class ClonedAppsFragment extends Fragment {
     }
 
     public void filter(String query) {
-        currentFilter = query != null ? query.toLowerCase() : "";
-        if (adapter != null) {
-            adapter.getFilter().filter(currentFilter);
-        }
     }
 
     private class LoadClonedAppsTask extends AsyncTask<Void, Void, List<VirtualApp>> {
@@ -168,7 +156,6 @@ public class ClonedAppsFragment extends Fragment {
             try {
                 return VirtualCore.get().getAllVirtualApps();
             } catch (Exception e) {
-                VirtualLog.e(TAG, "Error loading cloned apps", e);
                 return new ArrayList<>();
             }
         }

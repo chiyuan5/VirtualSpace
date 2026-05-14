@@ -2,7 +2,6 @@ package com.virtual.app.adapter;
 
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -72,15 +71,6 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> i
                 for (PackageInfo pkgInfo : apps) {
                     if (pkgInfo.packageName.toLowerCase().contains(filterPattern)) {
                         filtered.add(pkgInfo);
-                    } else {
-                        try {
-                            PackageManager pm = holder.itemView.getContext().getPackageManager();
-                            String appName = pkgInfo.applicationInfo.loadLabel(pm).toString();
-                            if (appName.toLowerCase().contains(filterPattern)) {
-                                filtered.add(pkgInfo);
-                            }
-                        } catch (Exception ignored) {
-                        }
                     }
                 }
 

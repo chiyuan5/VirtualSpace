@@ -1,6 +1,5 @@
 #include "hook_utils.h"
 #include <sys/uio.h>
-#include <asm/ptrace.h>
 
 #define PAGE_SIZE 4096
 #define ARM_INSTRUCTION_SIZE 4
@@ -268,7 +267,7 @@ int inline_hook(void* target, void* new_func, void** old_func) {
         memcpy(code, &branch_insn, 4);
     }
 
-    syncCache(target, ARM_INSTRUCTION_SIZE);
+    sync_cache(target, ARM_INSTRUCTION_SIZE);
 
     mprotect((void*)page_start, PAGE_SIZE, PROT_READ | PROT_EXEC);
 

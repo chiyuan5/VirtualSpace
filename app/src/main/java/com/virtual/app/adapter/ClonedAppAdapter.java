@@ -2,7 +2,6 @@ package com.virtual.app.adapter;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -103,22 +102,14 @@ public class ClonedAppAdapter extends RecyclerView.Adapter<ClonedAppAdapter.Clon
 
         void bind(VirtualApp app) {
             Context context = itemView.getContext();
-            PackageManager pm = context.getPackageManager();
+
+            appName.setText(app.appName);
+            appPackage.setText(app.fakePackageName);
+            appUserId.setText("User: " + app.userId);
 
             try {
-                appName.setText(app.appName);
-                appPackage.setText(app.fakePackageName);
-                appUserId.setText("User: " + app.userId);
-                
-                try {
-                    appIcon.setImageDrawable(pm.getApplicationIcon(app.fakePackageName));
-                } catch (Exception e) {
-                    appIcon.setImageResource(R.mipmap.ic_launcher);
-                }
+                appIcon.setImageResource(R.mipmap.ic_launcher);
             } catch (Exception e) {
-                appName.setText(app.appName);
-                appPackage.setText(app.packageName);
-                appUserId.setText("User: " + app.userId);
             }
 
             itemView.setOnClickListener(v -> {

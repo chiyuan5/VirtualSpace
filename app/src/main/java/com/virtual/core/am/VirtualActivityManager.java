@@ -6,17 +6,15 @@ public class VirtualActivityManager {
 
     private static final String TAG = "VirtualActivityManager";
     private static VirtualActivityManager instance;
-    private final VirtualCore core;
 
-    private VirtualActivityManager(VirtualCore core) {
-        this.core = core;
+    private VirtualActivityManager() {
     }
 
-    public static VirtualActivityManager getInstance(VirtualCore core) {
+    public static VirtualActivityManager getInstance() {
         if (instance == null) {
             synchronized (VirtualActivityManager.class) {
                 if (instance == null) {
-                    instance = new VirtualActivityManager(core);
+                    instance = new VirtualActivityManager();
                 }
             }
         }
@@ -43,11 +41,5 @@ public class VirtualActivityManager {
 
     public void cleanup() {
         instance = null;
-    }
-
-    private static class VirtualCore {
-        public static VirtualCore get() {
-            return com.virtual.core.VirtualCore.get();
-        }
     }
 }
