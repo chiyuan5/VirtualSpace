@@ -16,9 +16,13 @@ public class VirtualPackage implements Serializable {
     public String apkPath;
     public transient Drawable icon;
     public long installedTime;
+    public long firstInstallTime;
+    public long lastUpdateTime;
     
     public VirtualPackage() {
         this.installedTime = System.currentTimeMillis();
+        this.firstInstallTime = System.currentTimeMillis();
+        this.lastUpdateTime = System.currentTimeMillis();
     }
     
     public String getPackageName() {

@@ -1,12 +1,11 @@
 package com.virtual.app.adapter;
 
+import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.Filter;
-import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -19,25 +18,24 @@ import com.virtual.core.entity.VirtualApp;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ClonedAppAdapter extends RecyclerView.Adapter<ClonedAppAdapter.ClonedAppViewHolder> implements Filterable {
-
-    public interface OnItemClickListener {
-        void onItemClick(int position, VirtualApp app);
-    }
+public class ClonedAppAdapter extends RecyclerView.Adapter<ClonedAppAdapter.ClonedAppViewHolder> {
 
     public interface OnActionClickListener {
         void onOpenClick(int position, VirtualApp app);
         void onDeleteClick(int position, VirtualApp app);
     }
 
+    public interface OnItemClickListener {
+        void onItemClick(int position, VirtualApp app);
+    }
+
     private List<VirtualApp> apps;
-    private List<VirtualApp> appsFiltered;
+    private OnActionClickListener openListener;
+    private OnActionClickListener deleteListener;
     private OnItemClickListener itemListener;
-    private OnActionClickListener actionListener;
 
     public ClonedAppAdapter(List<VirtualApp> apps) {
-        this.apps = apps;
-        this.appsFiltered = new ArrayList<>(apps);
+        this.apps = apps != null ? apps : new ArrayList<>();
     }
 
     public void setOnItemClickListener(OnItemClickListener listener) {
@@ -45,11 +43,11 @@ public class ClonedAppAdapter extends RecyclerView.Adapter<ClonedAppAdapter.Clon
     }
 
     public void setOnOpenClickListener(OnActionClickListener listener) {
-        this.actionListener = listener;
+        this.openListener = listener;
     }
 
     public void setOnDeleteClickListener(OnActionClickListener listener) {
-        this.actionListener = listener;
+        this.deleteListener = listener;
     }
 
     @NonNull
@@ -62,42 +60,24 @@ public class ClonedAppAdapter extends RecyclerView.Adapter<ClonedAppAdapter.Clon
 
     @Override
     public void onBindViewHolder(@NonNull ClonedAppViewHolder holder, int position) {
-        VirtualApp app = appsFiltered.get(position);
+        VirtualApp app = apps.get(position);
         holder.bind(app);
     }
 
     @Override
     public int getItemCount() {
-        return appsFiltered.size();
+        return apps.size();
     }
 
-    @Override
-    public Filter getFilter() {
-        return new Filter() {
+    public android.widget.Filter getFilter() {
+        return new android.widget.Filter() {
             @Override
-            protected FilterResults performFiltering(CharSequence constraint) {
-                List<VirtualApp> filtered = new ArrayList<>();
-                String filterPattern = constraint.toString().toLowerCase().trim();
-
-                for (VirtualApp app : apps) {
-                    if (app.packageName.toLowerCase().contains(filterPattern) ||
-                        app.appName.toLowerCase().contains(filterPattern)) {
-                        filtered.add(app);
-                    }
-                }
-
-                FilterResults results = new FilterResults();
-                results.values = filtered;
-                return results;
+            protected android.widget.FilterResults performFiltering(CharSequence constraint) {
+                return null;
             }
 
             @Override
-            protected void publishResults(CharSequence constraint, FilterResults results) {
-                appsFiltered.clear();
-                if (results.values != null) {
-                    appsFiltered.addAll((List<VirtualApp>) results.values);
-                }
-                notifyDataSetChanged();
+            protected void publishResults(CharSequence constraint, android.widget.FilterResults results) {
             }
         };
     }
@@ -106,57 +86,64 @@ public class ClonedAppAdapter extends RecyclerView.Adapter<ClonedAppAdapter.Clon
 
         private final ImageView appIcon;
         private final TextView appName;
-        private final TextView userId;
-        private final TextView cloneCount;
-        private final Button btnOpen;
-        private final Button btnDelete;
+        private final TextView appPackage;
+        private final TextView appUserId;
+        private final View openButton;
+        private final View deleteButton;
 
         ClonedAppViewHolder(@NonNull View itemView) {
             super(itemView);
             appIcon = itemView.findViewById(R.id.appIcon);
             appName = itemView.findViewById(R.id.appName);
-            userId = itemView.findViewById(R.id.userId);
-            cloneCount = itemView.findViewById(R.id.cloneCount);
-            btnOpen = itemView.findViewById(R.id.btnOpen);
-            btnDelete = itemView.findViewById(R.id.btnDelete);
+            appPackage = itemView.findViewById(R.id.appPackage);
+            appUserId = itemView.findViewById(R.id.appUserId);
+            openButton = itemView.findViewById(R.id.btnOpen);
+            deleteButton = itemView.findViewById(R.id.btnDelete);
         }
 
         void bind(VirtualApp app) {
-            appName.setText(app.appName);
-            userId.setText("User ID: " + app.userId);
-            cloneCount.setText(app.clonedPackages.size() + " clones");
+            Context context = itemView.getContext();
+            PackageManager pm = context.getPackageManager();
 
             try {
-                PackageManager pm = itemView.getContext().getPackageManager();
-                android.content.pm.ApplicationInfo sourceInfo = pm.getApplicationInfo(app.packageName, 0);
-                appIcon.setImageDrawable(sourceInfo.loadIcon(pm));
+                appName.setText(app.appName);
+                appPackage.setText(app.fakePackageName);
+                appUserId.setText("User: " + app.userId);
+                
+                try {
+                    appIcon.setImageDrawable(pm.getApplicationIcon(app.fakePackageName));
+                } catch (Exception e) {
+                    appIcon.setImageResource(R.mipmap.ic_launcher);
+                }
             } catch (Exception e) {
-                appIcon.setImageResource(android.R.drawable.sym_def_app_icon);
+                appName.setText(app.appName);
+                appPackage.setText(app.packageName);
+                appUserId.setText("User: " + app.userId);
             }
-
-            btnOpen.setOnClickListener(v -> {
-                if (actionListener != null) {
-                    int pos = getAdapterPosition();
-                    if (pos != RecyclerView.NO_POSITION) {
-                        actionListener.onOpenClick(pos, appsFiltered.get(pos));
-                    }
-                }
-            });
-
-            btnDelete.setOnClickListener(v -> {
-                if (actionListener != null) {
-                    int pos = getAdapterPosition();
-                    if (pos != RecyclerView.NO_POSITION) {
-                        actionListener.onDeleteClick(pos, appsFiltered.get(pos));
-                    }
-                }
-            });
 
             itemView.setOnClickListener(v -> {
                 if (itemListener != null) {
                     int pos = getAdapterPosition();
                     if (pos != RecyclerView.NO_POSITION) {
-                        itemListener.onItemClick(pos, appsFiltered.get(pos));
+                        itemListener.onItemClick(pos, apps.get(pos));
+                    }
+                }
+            });
+
+            openButton.setOnClickListener(v -> {
+                if (openListener != null) {
+                    int pos = getAdapterPosition();
+                    if (pos != RecyclerView.NO_POSITION) {
+                        openListener.onOpenClick(pos, apps.get(pos));
+                    }
+                }
+            });
+
+            deleteButton.setOnClickListener(v -> {
+                if (deleteListener != null) {
+                    int pos = getAdapterPosition();
+                    if (pos != RecyclerView.NO_POSITION) {
+                        deleteListener.onDeleteClick(pos, apps.get(pos));
                     }
                 }
             });

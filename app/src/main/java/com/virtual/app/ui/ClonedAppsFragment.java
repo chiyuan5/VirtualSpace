@@ -72,12 +72,26 @@ public class ClonedAppsFragment extends Fragment {
             openCloneDetail(app);
         });
 
-        adapter.setOnOpenClickListener((position, app) -> {
-            openClone(app);
+        adapter.setOnOpenClickListener(new ClonedAppAdapter.OnActionClickListener() {
+            @Override
+            public void onOpenClick(int position, VirtualApp app) {
+                openClone(app);
+            }
+
+            @Override
+            public void onDeleteClick(int position, VirtualApp app) {
+            }
         });
 
-        adapter.setOnDeleteClickListener((position, app) -> {
-            confirmDelete(app);
+        adapter.setOnDeleteClickListener(new ClonedAppAdapter.OnActionClickListener() {
+            @Override
+            public void onOpenClick(int position, VirtualApp app) {
+            }
+
+            @Override
+            public void onDeleteClick(int position, VirtualApp app) {
+                confirmDelete(app);
+            }
         });
     }
 

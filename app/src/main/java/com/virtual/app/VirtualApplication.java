@@ -30,7 +30,7 @@ public class VirtualApplication extends Application {
             VirtualCore.get().init(this);
 
             if (VirtualCore.get().isSupportVersion()) {
-                HookManager.getInstance().init();
+                HookManager.get().init();
                 VirtualDispatch.getInstance(VirtualCore.get()).init();
                 ServiceBroker.getInstance(this).init();
                 Log.i(TAG, "Virtualization engine initialized");

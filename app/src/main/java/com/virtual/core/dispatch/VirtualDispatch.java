@@ -276,7 +276,6 @@ public class VirtualDispatch {
             spoof.gids = pkgInfo.gids;
             spoof.configPreferences = pkgInfo.configPreferences;
             spoof.reqFeatures = pkgInfo.reqFeatures;
-            spoof.targetPlatforms = pkgInfo.targetPlatforms;
 
             return spoof;
         } catch (Exception e) {

@@ -69,15 +69,15 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> i
                 List<PackageInfo> filtered = new ArrayList<>();
                 String filterPattern = constraint.toString().toLowerCase().trim();
 
-                for (PackageInfo pkg : apps) {
-                    if (pkg.packageName.toLowerCase().contains(filterPattern)) {
-                        filtered.add(pkg);
+                for (PackageInfo pkgInfo : apps) {
+                    if (pkgInfo.packageName.toLowerCase().contains(filterPattern)) {
+                        filtered.add(pkgInfo);
                     } else {
                         try {
-                            String appName = pkg.applicationInfo.loadLabel(
-                                holder.itemView.getContext().getPackageManager()).toString();
+                            PackageManager pm = holder.itemView.getContext().getPackageManager();
+                            String appName = pkgInfo.applicationInfo.loadLabel(pm).toString();
                             if (appName.toLowerCase().contains(filterPattern)) {
-                                filtered.add(pkg);
+                                filtered.add(pkgInfo);
                             }
                         } catch (Exception ignored) {
                         }
