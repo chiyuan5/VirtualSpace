@@ -61,6 +61,10 @@ public class VirtualCore {
         return true;
     }
 
+    public boolean isInitialized() {
+        return isInitialized;
+    }
+
     private void loadVirtualApps() {
         List<VirtualApp> apps = storage.loadVirtualApps();
         for (VirtualApp app : apps) {

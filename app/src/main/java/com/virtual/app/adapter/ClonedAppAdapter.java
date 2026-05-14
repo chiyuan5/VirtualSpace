@@ -68,25 +68,11 @@ public class ClonedAppAdapter extends RecyclerView.Adapter<ClonedAppAdapter.Clon
         return apps.size();
     }
 
-    public android.widget.Filter getFilter() {
-        return new android.widget.Filter() {
-            @Override
-            protected android.widget.FilterResults performFiltering(CharSequence constraint) {
-                return null;
-            }
-
-            @Override
-            protected void publishResults(CharSequence constraint, android.widget.FilterResults results) {
-            }
-        };
-    }
-
     class ClonedAppViewHolder extends RecyclerView.ViewHolder {
 
         private final ImageView appIcon;
         private final TextView appName;
-        private final TextView appPackage;
-        private final TextView appUserId;
+        private final TextView userId;
         private final View openButton;
         private final View deleteButton;
 
@@ -94,8 +80,7 @@ public class ClonedAppAdapter extends RecyclerView.Adapter<ClonedAppAdapter.Clon
             super(itemView);
             appIcon = itemView.findViewById(R.id.appIcon);
             appName = itemView.findViewById(R.id.appName);
-            appPackage = itemView.findViewById(R.id.appPackage);
-            appUserId = itemView.findViewById(R.id.appUserId);
+            userId = itemView.findViewById(R.id.userId);
             openButton = itemView.findViewById(R.id.btnOpen);
             deleteButton = itemView.findViewById(R.id.btnDelete);
         }
@@ -104,8 +89,7 @@ public class ClonedAppAdapter extends RecyclerView.Adapter<ClonedAppAdapter.Clon
             Context context = itemView.getContext();
 
             appName.setText(app.appName);
-            appPackage.setText(app.fakePackageName);
-            appUserId.setText("User: " + app.userId);
+            userId.setText("User: " + app.userId);
 
             try {
                 appIcon.setImageResource(R.mipmap.ic_launcher);
