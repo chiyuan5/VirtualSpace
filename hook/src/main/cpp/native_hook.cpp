@@ -15,7 +15,7 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void* reserved) {
     return JNI_VERSION_1_6;
 }
 
-JNIEXPORT void JNICALL Java_com_virtual_hook_native_NativeHook_initNative(JNIEnv* env, jobject thiz) {
+JNIEXPORT void JNICALL Java_com_virtual_hook_nativehook_NativeHook_initNative(JNIEnv* env, jobject thiz) {
     if (g_hook_initialized) return;
     
     g_hook_callback = env->NewGlobalRef(thiz);
@@ -27,7 +27,7 @@ JNIEXPORT void JNICALL Java_com_virtual_hook_native_NativeHook_initNative(JNIEnv
     g_hook_initialized = true;
 }
 
-JNIEXPORT jlong JNICALL Java_com_virtual_hook_native_NativeHook_hookMethod(JNIEnv* env, jobject thiz,
+JNIEXPORT jlong JNICALL Java_com_virtual_hook_nativehook_NativeHook_hookMethod(JNIEnv* env, jobject thiz,
     jstring library, jstring symbol, jlong newMethod) {
     
     if (!g_hook_initialized || !library || !symbol) return 0;
@@ -61,7 +61,7 @@ JNIEXPORT jlong JNICALL Java_com_virtual_hook_native_NativeHook_hookMethod(JNIEn
     return (jlong)(uintptr_t)old_method;
 }
 
-JNIEXPORT jlong JNICALL Java_com_virtual_hook_native_NativeHook_hookNativeMethod(JNIEnv* env, jobject thiz,
+JNIEXPORT jlong JNICALL Java_com_virtual_hook_nativehook_NativeHook_hookNativeMethod(JNIEnv* env, jobject thiz,
     jlong targetAddr, jlong newAddr) {
     
     void* old_addr = nullptr;
@@ -70,7 +70,7 @@ JNIEXPORT jlong JNICALL Java_com_virtual_hook_native_NativeHook_hookNativeMethod
     return result == HOOK_SUCCESS ? (jlong)(uintptr_t)old_addr : 0;
 }
 
-JNIEXPORT jlong JNICALL Java_com_virtual_hook_native_NativeHook_getModuleBase(JNIEnv* env, jobject thiz,
+JNIEXPORT jlong JNICALL Java_com_virtual_hook_nativehook_NativeHook_getModuleBase(JNIEnv* env, jobject thiz,
     jstring moduleName) {
     
     if (!moduleName) return 0;
@@ -82,7 +82,7 @@ JNIEXPORT jlong JNICALL Java_com_virtual_hook_native_NativeHook_getModuleBase(JN
     return (jlong)(uintptr_t)base;
 }
 
-JNIEXPORT jlong JNICALL Java_com_virtual_hook_native_NativeHook_getSymbol(JNIEnv* env, jobject thiz,
+JNIEXPORT jlong JNICALL Java_com_virtual_hook_nativehook_NativeHook_getSymbol(JNIEnv* env, jobject thiz,
     jstring moduleName, jstring symbolName) {
     
     if (!moduleName || !symbolName) return 0;
@@ -99,7 +99,7 @@ JNIEXPORT jlong JNICALL Java_com_virtual_hook_native_NativeHook_getSymbol(JNIEnv
     return (jlong)(uintptr_t)symbol;
 }
 
-JNIEXPORT jboolean JNICALL Java_com_virtual_hook_native_NativeHook_unhook(JNIEnv* env, jobject thiz,
+JNIEXPORT jboolean JNICALL Java_com_virtual_hook_nativehook_NativeHook_unhook(JNIEnv* env, jobject thiz,
     jstring library, jstring symbol, jlong oldAddr) {
     
     if (!library || !symbol) return JNI_FALSE;

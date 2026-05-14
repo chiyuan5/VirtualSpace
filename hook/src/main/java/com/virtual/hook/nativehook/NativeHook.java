@@ -1,4 +1,4 @@
-package com.virtual.hook.native;
+package com.virtual.hook.nativehook;
 
 import android.os.Build;
 
