@@ -1,14 +1,20 @@
 package com.virtual.core;
 
 import android.content.Context;
+import android.os.Build;
 
 import com.virtual.core.entity.VirtualApp;
 import com.virtual.core.entity.VirtualPackage;
+import com.virtual.core.fs.VirtualFileSystem;
 import com.virtual.core.impl.VirtualStorage;
-import com.virtual.hook.WebViewFixer;
+import com.virtual.core.system.VirtualActivityManager;
+import com.virtual.core.system.VirtualPackageManager;
+import com.virtual.hook.BinderHook;
 import com.virtual.hook.NetworkFixer;
+import com.virtual.hook.WebViewFixer;
 import com.virtual.util.VirtualLog;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +32,11 @@ public class VirtualCore {
     private final Map<String, VirtualPackage> virtualPackages = new ConcurrentHashMap<>();
     
     private boolean isInitialized = false;
+
+    private VirtualPackageManager packageManager;
+    private VirtualActivityManager activityManager;
+    private VirtualFileSystem fileSystem;
+    private BinderHook binderHook;
 
     private VirtualCore() {}
 
@@ -47,15 +58,48 @@ public class VirtualCore {
         }
 
         this.context = ctx.getApplicationContext();
+        
+        VirtualLog.i(TAG, "Initializing VirtualCore...");
+        VirtualLog.i(TAG, "Android Version: " + Build.VERSION.RELEASE + " (SDK " + Build.VERSION.SDK_INT + ")");
+
         this.storage = new VirtualStorage(this.context);
         this.storage.init();
+
+        this.fileSystem = VirtualFileSystem.getInstance(this.context);
+        this.packageManager = VirtualPackageManager.getInstance(this.context);
+        this.activityManager = VirtualActivityManager.getInstance(this.context);
+        
         loadVirtualApps();
         
-        WebViewFixer.init(this.context);
-        NetworkFixer.init(this.context);
+        for (VirtualApp app : virtualApps.values()) {
+            packageManager.registerVirtualApp(app);
+            fileSystem.initializeVirtualEnvironment(app);
+        }
+        
+        try {
+            WebViewFixer.init(this.context);
+            VirtualLog.d(TAG, "WebView fixes initialized");
+        } catch (Exception e) {
+            VirtualLog.e(TAG, "Failed to init WebView fixes", e);
+        }
+        
+        try {
+            NetworkFixer.init(this.context);
+            VirtualLog.d(TAG, "Network fixes initialized");
+        } catch (Exception e) {
+            VirtualLog.e(TAG, "Failed to init Network fixes", e);
+        }
+        
+        try {
+            this.binderHook = BinderHook.getInstance(this.context);
+            VirtualLog.d(TAG, "BinderHook instance created");
+        } catch (Exception e) {
+            VirtualLog.e(TAG, "Failed to create BinderHook", e);
+        }
         
         isInitialized = true;
-        VirtualLog.i(TAG, "VirtualCore initialized with Android 13+ fixes");
+        VirtualLog.i(TAG, "VirtualCore initialized successfully");
+        VirtualLog.i(TAG, "Loaded " + virtualApps.size() + " virtual apps");
     }
 
     public Context getContext() {
@@ -63,7 +107,7 @@ public class VirtualCore {
     }
 
     public boolean isSupportVersion() {
-        return true;
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.P;
     }
 
     public boolean isInitialized() {
@@ -75,7 +119,7 @@ public class VirtualCore {
         for (VirtualApp app : apps) {
             virtualApps.put(app.packageName, app);
         }
-        VirtualLog.i(TAG, "Loaded " + apps.size() + " virtual apps");
+        VirtualLog.i(TAG, "Loaded " + apps.size() + " virtual apps from storage");
     }
 
     public VirtualApp createVirtualApp(String packageName, String appName) {
@@ -95,15 +139,33 @@ public class VirtualCore {
         app.isActive = true;
 
         virtualApps.put(packageName, app);
+        
+        if (packageManager != null) {
+            packageManager.registerVirtualApp(app);
+        }
+        
+        if (fileSystem != null) {
+            fileSystem.initializeVirtualEnvironment(app);
+            fileSystem.copyOriginalDataToVirtual(packageName, app);
+        }
+        
         storage.saveVirtualApps(new ArrayList<>(virtualApps.values()));
         
-        VirtualLog.i(TAG, "Created virtual app: " + appName);
+        VirtualLog.i(TAG, "Created virtual app: " + appName + " (userId=" + userId + ")");
         return app;
     }
 
     public boolean removeVirtualApp(String packageName) {
         VirtualApp app = virtualApps.remove(packageName);
         if (app != null) {
+            if (packageManager != null) {
+                packageManager.unregisterVirtualApp(packageName);
+            }
+            
+            if (fileSystem != null) {
+                fileSystem.deleteVirtualEnvironment(app);
+            }
+            
             storage.saveVirtualApps(new ArrayList<>(virtualApps.values()));
             VirtualLog.i(TAG, "Removed virtual app: " + packageName);
             return true;
@@ -129,11 +191,47 @@ public class VirtualCore {
     }
 
     public boolean isVirtualPackage(String packageName) {
-        return virtualApps.containsKey(packageName) || virtualPackages.containsKey(packageName);
+        if (packageName == null) return false;
+        if (virtualApps.containsKey(packageName)) return true;
+        for (VirtualApp app : virtualApps.values()) {
+            if (packageName.equals(app.fakePackageName)) return true;
+        }
+        return virtualPackages.containsKey(packageName);
     }
 
     public void addVirtualPackage(VirtualPackage vPkg) {
         virtualPackages.put(vPkg.packageName, vPkg);
+    }
+
+    public VirtualPackageManager getPackageManager() {
+        return packageManager;
+    }
+
+    public VirtualActivityManager getActivityManager() {
+        return activityManager;
+    }
+
+    public VirtualFileSystem getFileSystem() {
+        return fileSystem;
+    }
+
+    public BinderHook getBinderHook() {
+        return binderHook;
+    }
+
+    public void initBinderHook() {
+        if (binderHook != null && !isBinderHookInitialized()) {
+            try {
+                binderHook.init();
+                VirtualLog.d(TAG, "BinderHook initialized");
+            } catch (Exception e) {
+                VirtualLog.e(TAG, "Failed to init BinderHook", e);
+            }
+        }
+    }
+
+    private boolean isBinderHookInitialized() {
+        return binderHook != null;
     }
 
     private int getNextUserId() {
@@ -147,14 +245,20 @@ public class VirtualCore {
     }
 
     private String generateFakeDeviceId() {
-        return "fake_device_" + System.currentTimeMillis();
+        return "35" + String.format("%013d", System.currentTimeMillis() % 100000000000L);
     }
 
     private String generateFakeAndroidId() {
-        return String.format("%08x", (int) System.currentTimeMillis());
+        return String.format("%08x", (int) (System.currentTimeMillis() & 0xFFFFFFFF));
     }
 
     public void cleanup() {
+        for (VirtualApp app : virtualApps.values()) {
+            if (fileSystem != null) {
+                fileSystem.deleteVirtualEnvironment(app);
+            }
+        }
+        
         virtualApps.clear();
         virtualPackages.clear();
         isInitialized = false;
