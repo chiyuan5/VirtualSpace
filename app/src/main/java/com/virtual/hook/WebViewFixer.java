@@ -3,13 +3,11 @@ package com.virtual.hook;
 import android.content.Context;
 import android.os.Build;
 import android.webkit.WebView;
-import android.webkit.WebViewDatabase;
 import android.webkit.WebSettings;
 
 import java.io.File;
 import java.lang.reflect.Method;
 
-import com.virtual.hook.nativehook.NativeHook;
 import com.virtual.util.VirtualLog;
 
 public class WebViewFixer {
