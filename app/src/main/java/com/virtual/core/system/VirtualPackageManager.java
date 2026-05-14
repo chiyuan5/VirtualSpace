@@ -11,8 +11,6 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.os.Binder;
 import android.os.IBinder;
-import android.os.RemoteException;
-import android.os.UserHandle;
 
 import com.virtual.core.VirtualCore;
 import com.virtual.core.entity.VirtualApp;
@@ -117,13 +115,6 @@ public class VirtualPackageManager {
             intent.addCategory(Intent.CATEGORY_LAUNCHER);
             intent.setPackage(virtualApp.fakePackageName);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
-            List<ResolveInfo> activities = queryIntentActivities(intent, 0, null, userId);
-            if (activities != null && !activities.isEmpty()) {
-                ResolveInfo ri = activities.get(0);
-                intent.setClassName(ri.activityInfo.packageName, ri.activityInfo.name);
-                return intent;
-            }
             return intent;
         } catch (Exception e) {
             VirtualLog.e(TAG, "Error getting launch intent for: " + packageName, e);
@@ -176,28 +167,6 @@ public class VirtualPackageManager {
         }
     }
 
-    public List<ResolveInfo> queryBroadcastReceivers(Intent intent, int flags, String resolvedType, int userId) {
-        try {
-            List<ResolveInfo> result = new ArrayList<>();
-            android.content.pm.PackageManager pm = context.getPackageManager();
-            List<android.content.pm.ResolveInfo> receivers = pm.queryBroadcastReceivers(intent, flags);
-
-            for (android.content.pm.ResolveInfo ri : receivers) {
-                if (ri.activityInfo != null) {
-                    ResolveInfo vri = convertToVirtualResolveInfo(ri, userId);
-                    if (vri != null) {
-                        result.add(vri);
-                    }
-                }
-            }
-
-            return result;
-        } catch (Exception e) {
-            VirtualLog.e(TAG, "Error querying broadcast receivers", e);
-            return Collections.emptyList();
-        }
-    }
-
     public ResolveInfo resolveActivity(Intent intent, int flags, String resolvedType, int userId) {
         List<ResolveInfo> activities = queryIntentActivities(intent, flags, resolvedType, userId);
         if (activities != null && !activities.isEmpty()) {
@@ -212,29 +181,6 @@ public class VirtualPackageManager {
             return services.get(0);
         }
         return null;
-    }
-
-    public ProviderInfo resolveContentProvider(String authority, int flags, int userId) {
-        try {
-            android.content.pm.PackageManager pm = context.getPackageManager();
-            List<android.content.pm.ProviderInfo> providers = pm.queryContentProviders(null, 0, 0);
-
-            for (android.content.pm.ProviderInfo pi : providers) {
-                if (authority.equals(pi.authority)) {
-                    ProviderInfo vpi = new ProviderInfo();
-                    vpi.authority = pi.authority;
-                    vpi.packageName = pi.packageName;
-                    vpi.name = pi.name;
-                    vpi.processName = pi.processName;
-                    vpi.applicationInfo = getApplicationInfo(pi.packageName, 0, userId);
-                    return vpi;
-                }
-            }
-            return null;
-        } catch (Exception e) {
-            VirtualLog.e(TAG, "Error resolving content provider: " + authority, e);
-            return null;
-        }
     }
 
     public ActivityInfo getActivityInfo(ComponentName component, int flags, int userId) {
@@ -380,7 +326,6 @@ public class VirtualPackageManager {
             ri.labelRes = original.labelRes;
             ri.nonLocalizedLabel = original.nonLocalizedLabel;
             ri.icon = original.icon;
-            ri.configurationDescription = original.configurationDescription;
 
             if (virtualApp != null && ri.activityInfo != null) {
                 ri.activityInfo = createVirtualActivityInfo(ri.activityInfo, virtualApp);

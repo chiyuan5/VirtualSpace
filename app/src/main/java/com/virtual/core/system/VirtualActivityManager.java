@@ -6,11 +6,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.app.ActivityManager.RunningAppProcessInfo;
 import android.app.ActivityManager.RunningServiceInfo;
-import android.app.ActivityManager.RunningTaskInfo;
 import android.os.Binder;
 import android.os.IBinder;
-import android.os.RemoteException;
-import android.os.UserHandle;
 
 import com.virtual.core.VirtualCore;
 import com.virtual.core.entity.VirtualApp;
@@ -28,7 +25,6 @@ public class VirtualActivityManager {
 
     private final Context context;
     private final VirtualCore core;
-    private final VirtualPackageManager packageManager;
     private final Map<String, Integer> processUsers = new HashMap<>();
 
     public static VirtualActivityManager getInstance(Context context) {
@@ -45,7 +41,6 @@ public class VirtualActivityManager {
     private VirtualActivityManager(Context context) {
         this.context = context.getApplicationContext();
         this.core = VirtualCore.get();
-        this.packageManager = VirtualPackageManager.getInstance(context);
         VirtualLog.d(TAG, "VirtualActivityManager initialized");
     }
 
@@ -68,19 +63,18 @@ public class VirtualActivityManager {
 
             if (packageName == null) return false;
 
-            VirtualApp virtualApp = packageManager.getVirtualApp(packageName);
+            VirtualApp virtualApp = core.getVirtualAppByUserId(userId);
             if (virtualApp == null) {
-                VirtualLog.w(TAG, "Not a virtual package: " + packageName);
+                VirtualLog.w(TAG, "No virtual app found for user: " + userId);
                 return false;
             }
 
             Intent virtualIntent = new Intent(intent);
             virtualIntent.setPackage(virtualApp.fakePackageName);
             virtualIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            virtualIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
             context.startActivity(virtualIntent);
-            VirtualLog.d(TAG, "Started virtual activity: " + packageName + " -> " + virtualApp.fakePackageName);
+            VirtualLog.d(TAG, "Started virtual activity: " + packageName);
             return true;
         } catch (Exception e) {
             VirtualLog.e(TAG, "Error starting activity", e);
@@ -95,9 +89,9 @@ public class VirtualActivityManager {
 
             if (packageName == null) return false;
 
-            VirtualApp virtualApp = packageManager.getVirtualApp(packageName);
+            VirtualApp virtualApp = core.getVirtualAppByUserId(userId);
             if (virtualApp == null) {
-                VirtualLog.w(TAG, "Not a virtual package: " + packageName);
+                VirtualLog.w(TAG, "No virtual app found for user: " + userId);
                 return false;
             }
 
@@ -105,7 +99,7 @@ public class VirtualActivityManager {
             virtualIntent.setPackage(virtualApp.fakePackageName);
 
             context.startService(virtualIntent);
-            VirtualLog.d(TAG, "Started virtual service: " + packageName + " -> " + virtualApp.fakePackageName);
+            VirtualLog.d(TAG, "Started virtual service: " + packageName);
             return true;
         } catch (Exception e) {
             VirtualLog.e(TAG, "Error starting service", e);
@@ -120,9 +114,9 @@ public class VirtualActivityManager {
 
             if (packageName == null) return false;
 
-            VirtualApp virtualApp = packageManager.getVirtualApp(packageName);
+            VirtualApp virtualApp = core.getVirtualAppByUserId(userId);
             if (virtualApp == null) {
-                VirtualLog.w(TAG, "Not a virtual package: " + packageName);
+                VirtualLog.w(TAG, "No virtual app found for user: " + userId);
                 return false;
             }
 
@@ -172,16 +166,6 @@ public class VirtualActivityManager {
                             vInfo.pid = info.pid;
                             vInfo.uid = info.uid;
                             vInfo.importance = info.importance;
-                            vInfo.importanceReasonCode = info.importanceReasonCode;
-                            vInfo.importanceReasonPid = info.importanceReasonPid;
-                            vInfo.importanceReasonComponent = info.importanceReasonComponent;
-                            vInfo.lastTrimLevel = info.lastTrimLevel;
-                            vInfo.lru = info.lru;
-                            vInfo.adjType = info.adjType;
-                            vInfo.adjTypeCode = info.adjTypeCode;
-                            vInfo.adjSource = info.adjSource;
-                            vInfo.adjTarget = info.adjTarget;
-                            vInfo.setAdjType(info.adjType);
                             result.add(vInfo);
                         }
                     }
@@ -212,7 +196,6 @@ public class VirtualActivityManager {
                             vInfo.foreground = info.foreground;
                             vInfo.activeSince = info.activeSince;
                             vInfo.clientCount = info.clientCount;
-                            vInfoCrashCount = info.crashCount;
                             vInfo.app = info.app;
                             result.add(vInfo);
                         }
@@ -241,7 +224,7 @@ public class VirtualActivityManager {
 
     public void clearAppData(String packageName, int userId) {
         try {
-            VirtualApp app = packageManager.getVirtualApp(packageName);
+            VirtualApp app = core.getVirtualAppByUserId(userId);
             if (app == null) return;
 
             String dataDir = context.getFilesDir().getAbsolutePath() + "/virtual/" + app.userId + "/" + app.packageName;

@@ -18,6 +18,10 @@ public class VirtualLog {
         android.util.Log.w(TAG + "/" + tag, msg);
     }
 
+    public static void w(String tag, String msg, Throwable t) {
+        android.util.Log.w(TAG + "/" + tag, msg, t);
+    }
+
     public static void e(String tag, String msg) {
         android.util.Log.e(TAG + "/" + tag, msg);
     }

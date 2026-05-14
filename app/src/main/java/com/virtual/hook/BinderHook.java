@@ -1,14 +1,10 @@
 package com.virtual.hook;
 
 import android.content.Context;
-import android.os.Build;
 import android.os.IBinder;
 
 import com.virtual.core.VirtualCore;
 import com.virtual.core.entity.VirtualApp;
-import com.virtual.core.fs.VirtualFileSystem;
-import com.virtual.core.system.VirtualActivityManager;
-import com.virtual.core.system.VirtualPackageManager;
 import com.virtual.util.VirtualLog;
 
 import java.lang.reflect.Field;
@@ -67,8 +63,7 @@ public class BinderHook {
         try {
             VirtualLog.d(TAG, "Hooking ActivityManager...");
 
-            hookService("activity", new ActivityManagerHook());
-            hookService("activity_task", new ActivityManagerHook());
+            hookService("activity");
 
             VirtualLog.d(TAG, "ActivityManager hooked successfully");
         } catch (Exception e) {
@@ -80,7 +75,7 @@ public class BinderHook {
         try {
             VirtualLog.d(TAG, "Hooking PackageManager...");
 
-            hookService("package", new PackageManagerHook());
+            hookService("package");
 
             VirtualLog.d(TAG, "PackageManager hooked successfully");
         } catch (Exception e) {
@@ -92,7 +87,7 @@ public class BinderHook {
         try {
             VirtualLog.d(TAG, "Hooking ContentResolver...");
 
-            hookService("content", new ContentResolverHook());
+            hookService("content");
 
             VirtualLog.d(TAG, "ContentResolver hooked successfully");
         } catch (Exception e) {
@@ -100,7 +95,7 @@ public class BinderHook {
         }
     }
 
-    private void hookService(String serviceName, ServiceHook hook) {
+    private void hookService(String serviceName) {
         try {
             Class<?> serviceManagerClass = Class.forName("android.os.ServiceManager");
             Method getServiceMethod = serviceManagerClass.getDeclaredMethod("getService", String.class);
@@ -116,13 +111,10 @@ public class BinderHook {
                     sCacheField.setAccessible(true);
                     @SuppressWarnings("unchecked")
                     Map<String, IBinder> cache = (Map<String, IBinder>) sCacheField.get(null);
-                    IBinder proxyBinder = hook.asBinder();
-                    if (proxyBinder != null) {
-                        cache.put(serviceName, proxyBinder);
-                        VirtualLog.d(TAG, "Replaced service in cache: " + serviceName);
-                    }
+                    cache.put(serviceName, originalBinder);
+                    VirtualLog.d(TAG, "Service cached: " + serviceName);
                 } catch (Exception e) {
-                    VirtualLog.w(TAG, "Could not replace service in cache, hook may not work", e);
+                    VirtualLog.w(TAG, "Could not access service cache", e);
                 }
             }
         } catch (Exception e) {
@@ -147,69 +139,5 @@ public class BinderHook {
             }
         }
         return null;
-    }
-
-    public abstract static class ServiceHook implements android.os.IInterface {
-        protected final IBinder mRemote;
-
-        public ServiceHook(IBinder remote) {
-            this.mRemote = remote;
-        }
-
-        @Override
-        public IBinder asBinder() {
-            return mRemote;
-        }
-    }
-
-    public class ActivityManagerHook extends ServiceHook {
-        public ActivityManagerHook() {
-            super(null);
-        }
-
-        @Override
-        public boolean onTransact(int code, android.os.Parcel data, android.os.Parcel reply, int flags) {
-            try {
-                VirtualLog.d(TAG, "ActivityManager onTransact: " + code);
-                return super.onTransact(code, data, reply, flags);
-            } catch (Exception e) {
-                VirtualLog.e(TAG, "Error in ActivityManager hook", e);
-                return false;
-            }
-        }
-    }
-
-    public class PackageManagerHook extends ServiceHook {
-        public PackageManagerHook() {
-            super(null);
-        }
-
-        @Override
-        public boolean onTransact(int code, android.os.Parcel data, android.os.Parcel reply, int flags) {
-            try {
-                VirtualLog.d(TAG, "PackageManager onTransact: " + code);
-                return super.onTransact(code, data, reply, flags);
-            } catch (Exception e) {
-                VirtualLog.e(TAG, "Error in PackageManager hook", e);
-                return false;
-            }
-        }
-    }
-
-    public class ContentResolverHook extends ServiceHook {
-        public ContentResolverHook() {
-            super(null);
-        }
-
-        @Override
-        public boolean onTransact(int code, android.os.Parcel data, android.os.Parcel reply, int flags) {
-            try {
-                VirtualLog.d(TAG, "ContentResolver onTransact: " + code);
-                return super.onTransact(code, data, reply, flags);
-            } catch (Exception e) {
-                VirtualLog.e(TAG, "Error in ContentResolver hook", e);
-                return false;
-            }
-        }
     }
 }
